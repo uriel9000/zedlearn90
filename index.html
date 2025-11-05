@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZedLearn — AI Study Assistant</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="AI-powered study assistant with real-time text rewriting, translation, proofreading, and study tools">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  
+  <!-- Styles and Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* All your existing CSS styles remain the same */
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary: #10b981;
+      --text: #1f2937;
+      --text-light: #6b7280;
+      --bg: #f9fafb;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --radius: 12px;
+    }
+
+    .dark-theme {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #10b981;
+      --text: #f9fafb;
+      --text-light: #d1d5db;
+      --bg: #111827;
+      --card-bg: #1f2937;
+      --border: #374151;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 15px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      max-width: 300px;
+      display: none;
+    }
+
+    .install-prompt.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .install-prompt-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .install-prompt-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .install-prompt-buttons button {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .install-prompt-install {
+      background: var(--primary);
+      color: white;
+    }
+
+    .install-prompt-dismiss {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    /* Rest of your existing CSS styles... */
+    /* Header & Navigation */
+    header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--text);
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary);
+      border-radius: 3px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .card-header i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .card-header h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background-color: var(--card-bg);
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      background-color: var(--text-light);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      width: auto;
+    }
+
+    /* Output Elements */
+    .output-box {
+      background-color: var(--bg);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 4px solid var(--primary);
+      white-space: pre-line;
+      min-height: 100px;
+    }
+
+    .status {
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+
+    .status-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--secondary);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .status-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-left: 4px solid #ef4444;
+    }
+
+    .status-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .status-warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border-left: 4px solid #f59e0b;
+    }
+
+    /* Connection Status */
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 8px;
+    }
+
+    .connection-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ef4444;
+    }
+
+    .connection-dot.connected {
+      background-color: var(--secondary);
+    }
+
+    .connection-status.connected {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .connection-status.disconnected {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+    }
+
+    .connection-status.warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid #f59e0b;
+    }
+
+    /* API Key Section */
+    .api-config {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+
+    .api-config h3 {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .api-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .api-input-group input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      color: #1f2937;
+    }
+
+    .api-input-group button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Streaming Animation */
+    .streaming-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background-color: var(--primary);
+      margin-left: 2px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--card-bg);
+      padding: 30px 0;
+      margin-top: 50px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background-color: var(--card-bg);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        gap: 10px;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .nav-links a {
+        padding: 12px 15px;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .api-input-group {
+        flex-direction: column;
+      }
+
+      .install-prompt {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Install Prompt -->
+  <div class="install-prompt" id="installPrompt">
+    <div class="install-prompt-header">
+      <i class="fas fa-download"></i>
+      <strong>Install ZedLearn</strong>
+    </div>
+    <p>Install this app on your device for a better experience</p>
+    <div class="install-prompt-buttons">
+      <button class="install-prompt-install" id="installButton">Install</button>
+      <button class="install-prompt-dismiss" id="dismissButton">Not Now</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-brain"></i>
+        <span>ZedLearn</span>
+      </div>
+      
+      <nav class="nav-links">
+        <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+        <a href="#"><i class="fas fa-book"></i> Study</a>
+        <a href="#"><i class="fas fa-tools"></i> Tools</a>
+        <a href="#"><i class="fas fa-user"></i> Profile</a>
+      </nav>
+      
+      <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+      </button>
+      
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="api-config">
+      <h3><i class="fas fa-key"></i> API Configuration</h3>
+      <p>Enter your App ID from picoapps builder to connect to the AI service</p>
+      <div class="api-input-group">
+        <input type="text" id="appIdInput" placeholder="Enter your App ID (e.g., something-grow)" />
+        <button id="saveAppId">
+          <i class="fas fa-save"></i> Save & Connect
+        </button>
+      </div>
+    </div>
+
+    <div class="connection-status warning" id="connectionStatus">
+      <div class="connection-dot"></div>
+      <span id="connectionText">Please enter your App ID to connect</span>
+    </div>
+
+    <section class="card">
+      <div class="card-header">
+        <i class="fas fa-comment"></i>
+        <h3>Ask AI Assistant</h3>
+      </div>
+      
+      <div class="form-group">
+        <label for="askInput">Your question or request</label>
+        <textarea id="askInput" rows="4" placeholder="Ask anything..."></textarea>
+      </div>
+      
+      <button class="btn" id="askBtn" disabled>
+        <i class="fas fa-question-circle"></i>
+        Ask AI
+      </button>
+      
+      <div class="form-group">
+        <label>AI Response</label>
+        <div id="askOutput" class="output-box"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">AI Tools</h2>
+      <div class="tools-grid">
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-pen-fancy"></i>
+            <h3>Text Rewriter</h3>
+          </div>
+          
+          <div class="form-group">
+            <label for="writerInput">Enter text to rewrite</label>
+            <textarea id="writerInput" rows="4" placeholder="Type your text here..."></textarea>
+          </div>
+          
+          <button class="btn" id="writerBtn" disabled>
+            <i class="fas fa-magic"></i>
+            Rewrite Text
+          </button>
+          
+          <div class="form-group">
+            <label>Result</label>
+            <div id="writerOutput" class="output-box"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-language"></i>
+            <h3>Translator</h3>
+          </div>
+          
+          <div class="form-group">
+            <label for="translateInput">Text to translate</label>
+            <textarea id="translateInput" rows="4" placeholder="Enter text to translate..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="language">Target Language</label>
+            <select id="language">
+              <option value="French">French</option>
+              <option value="Spanish">Spanish</option>
+              <option value="German">German</option>
+              <option value="Italian">Italian</option>
+            </select>
+          </div>
+          
+          <button class="btn" id="translateBtn" disabled>
+            <i class="fas fa-exchange-alt"></i>
+            Translate
+          </button>
+          
+          <div class="form-group">
+            <label>Translation</label>
+            <div id="translateOutput" class="output-box"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-spell-check"></i>
+            <h3>Proofreader</h3>
+          </div>
+          
+          <div class="form-group">
+            <label for="proofInput">Text to proofread</label>
+            <textarea id="proofInput" rows="4" placeholder="Enter text with possible errors..."></textarea>
+          </div>
+          
+          <button class="btn" id="proofBtn" disabled>
+            <i class="fas fa-check-circle"></i>
+            Proofread Text
+          </button>
+          
+          <div class="form-group">
+            <label>Corrected Text</label>
+            <div id="proofOutput" class="output-box"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-graduation-cap"></i>
+            <h3>Study Assistant</h3>
+          </div>
+          
+          <div class="form-group">
+            <label for="studyInput">Study topic or concept</label>
+            <textarea id="studyInput" rows="4" placeholder="Enter a topic to study..."></textarea>
+          </div>
+          
+          <button class="btn" id="studyBtn" disabled>
+            <i class="fas fa-lightbulb"></i>
+            Explain Concept
+          </button>
+          
+          <div class="form-group">
+            <label>Explanation</label>
+            <div id="studyOutput" class="output-box"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 ZedLearn. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // PWA Installation
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installButton = document.getElementById('installButton');
+    const dismissButton = document.getElementById('dismissButton');
+
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      deferredPrompt = e;
+      // Show the install prompt
+      installPrompt.classList.add('show');
+    });
+
+    installButton.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      // Show the install prompt
+      deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        installPrompt.classList.remove('show');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      
+      // Clear the saved prompt since it can't be used again
+      deferredPrompt = null;
+    });
+
+    dismissButton.addEventListener('click', () => {
+      installPrompt.classList.remove('show');
+      // Hide for a week
+      localStorage.setItem('installPromptDismissed', Date.now());
+    });
+
+    // Check if user recently dismissed the prompt
+    const lastDismissed = localStorage.getItem('installPromptDismissed');
+    if (lastDismissed && (Date.now() - lastDismissed) < 7 * 24 * 60 * 60 * 1000) {
+      installPrompt.style.display = 'none';
+    }
+
+    // Check if app is already installed
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA was installed');
+      installPrompt.classList.remove('show');
+      deferredPrompt = null;
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+
+    // Your existing JavaScript code for the app functionality...
+    // Configuration
+    let currentAppId = '';
+    let currentWebSocket = null;
+    let currentResponse = '';
+
+    // DOM Elements
+    const connectionStatus = document.getElementById('connectionStatus');
+    const connectionDot = connectionStatus.querySelector('.connection-dot');
+    const connectionText = document.getElementById('connectionText');
+    const appIdInput = document.getElementById('appIdInput');
+    const saveAppIdBtn = document.getElementById('saveAppId');
+
+    // Initialize the application
+    function init() {
+      setupEventListeners();
+      loadSavedAppId();
+    }
+
+    // Set up event listeners
+    function setupEventListeners() {
+      // Theme Toggle
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = themeToggle.querySelector('i');
+      
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        
+        if (document.body.classList.contains('dark-theme')) {
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        } else {
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        }
+      });
+
+      // Mobile Menu Toggle
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      mobileMenuBtn.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+
+      // App ID Save
+      saveAppIdBtn.addEventListener('click', saveAppId);
+      appIdInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') saveAppId();
+      });
+
+      // AI Function Buttons
+      document.getElementById('askBtn').addEventListener('click', () => processWithAI('ask'));
+      document.getElementById('writerBtn').addEventListener('click', () => processWithAI('writer'));
+      document.getElementById('translateBtn').addEventListener('click', () => processWithAI('translate'));
+      document.getElementById('proofBtn').addEventListener('click', () => processWithAI('proof'));
+      document.getElementById('studyBtn').addEventListener('click', () => processWithAI('study'));
+    }
+
+    function loadSavedAppId() {
+      const savedAppId = localStorage.getItem('zedlearn_app_id');
+      if (savedAppId) {
+        currentAppId = savedAppId;
+        appIdInput.value = savedAppId;
+        updateConnectionStatus('connected', 'Ready to use AI tools');
+        enableAIButtons();
+      }
+    }
+
+    function saveAppId() {
+      const appId = appIdInput.value.trim();
+      if (!appId) {
+        alert('Please enter a valid App ID');
+        return;
+      }
+
+      currentAppId = appId;
+      localStorage.setItem('zedlearn_app_id', appId);
+      updateConnectionStatus('connected', 'App ID saved. Ready to use AI tools!');
+      enableAIButtons();
+    }
+
+    function enableAIButtons() {
+      document.getElementById('askBtn').disabled = false;
+      document.getElementById('writerBtn').disabled = false;
+      document.getElementById('translateBtn').disabled = false;
+      document.getElementById('proofBtn').disabled = false;
+      document.getElementById('studyBtn').disabled = false;
+    }
+
+    function updateConnectionStatus(status, message) {
+      connectionStatus.className = 'connection-status';
+      connectionDot.className = 'connection-dot';
+      
+      switch(status) {
+        case 'connected':
+          connectionStatus.classList.add('connected');
+          connectionDot.classList.add('connected');
+          break;
+        case 'disconnected':
+          connectionStatus.classList.add('disconnected');
+          break;
+        case 'warning':
+          connectionStatus.classList.add('warning');
+          break;
+        case 'streaming':
+          connectionStatus.classList.add('connected');
+          connectionDot.classList.add('connected');
+          break;
+      }
+      
+      connectionText.textContent = message;
+    }
+
+    function createWebSocketConnection(prompt, taskType) {
+      if (!currentAppId) {
+        alert('Please enter your App ID first');
+        return null;
+      }
+
+      // Close existing connection if any
+      if (currentWebSocket && currentWebSocket.readyState === WebSocket.OPEN) {
+        currentWebSocket.close();
+      }
+
+      const encodedPrompt = encodeURIComponent(prompt);
+      const wsUrl = `wss://backend.buildpicoapps.com/ask_ai_streaming?app_id=${currentAppId}&prompt=${encodedPrompt}`;
+      
+      console.log('Connecting to WebSocket:', wsUrl);
+      
+      try {
+        currentWebSocket = new WebSocket(wsUrl);
+        const outputElement = document.getElementById(`${taskType}Output`);
+        
+        // Reset current response
+        currentResponse = '';
+        outputElement.textContent = '';
+        
+        currentWebSocket.onopen = () => {
+          console.log('✅ WebSocket connected for:', taskType);
+          updateConnectionStatus('streaming', 'Receiving AI response...');
+        };
+        
+        currentWebSocket.onmessage = (event) => {
+          try {
+            // The API sends plain text chunks, not JSON
+            const textChunk = event.data;
+            console.log('Received text chunk:', textChunk);
+            
+            // Append the text chunk to our current response
+            currentResponse += textChunk;
+            
+            // Update the output element with streaming cursor
+            outputElement.innerHTML = currentResponse + '<span class="streaming-cursor"></span>';
+            
+            // Auto-scroll to bottom
+            outputElement.scrollTop = outputElement.scrollHeight;
+            
+          } catch (error) {
+            console.error('Error processing message:', error);
+            outputElement.textContent = 'Error processing response: ' + error.message;
+          }
+        };
+        
+        currentWebSocket.onclose = (event) => {
+          console.log('WebSocket closed:', event.code, event.reason);
+          
+          // Remove streaming cursor when connection closes
+          const outputElement = document.getElementById(`${taskType}Output`);
+          outputElement.textContent = currentResponse;
+          
+          if (event.code !== 1000) {
+            updateConnectionStatus('disconnected', 'Connection closed');
+          } else {
+            updateConnectionStatus('connected', 'Response complete');
+          }
+          
+          enableButton(taskType);
+        };
+        
+        currentWebSocket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          const outputElement = document.getElementById(`${taskType}Output`);
+          outputElement.textContent = 'Connection error. Please check your App ID and try again.';
+          updateConnectionStatus('disconnected', 'Connection error');
+          enableButton(taskType);
+        };
+        
+        return currentWebSocket;
+      } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+        const outputElement = document.getElementById(`${taskType}Output`);
+        outputElement.textContent = 'Failed to create connection: ' + error.message;
+        updateConnectionStatus('disconnected', 'Connection failed');
+        enableButton(taskType);
+        return null;
+      }
+    }
+
+    function processWithAI(type) {
+      if (!currentAppId) {
+        alert('Please enter your App ID first');
+        return;
+      }
+      
+      let inputElement, prompt;
+      
+      switch(type) {
+        case 'writer':
+          inputElement = document.getElementById('writerInput');
+          prompt = `Rewrite the following text to be more professional and clear while maintaining the original meaning:\n\n${inputElement.value}`;
+          break;
+        case 'translate':
+          inputElement = document.getElementById('translateInput');
+          const language = document.getElementById('language').value;
+          prompt = `Translate the following text to ${language}. Provide only the translation:\n\n${inputElement.value}`;
+          break;
+        case 'proof':
+          inputElement = document.getElementById('proofInput');
+          prompt = `Proofread and correct the following text, fixing any grammar, spelling, or punctuation errors. Provide only the corrected text:\n\n${inputElement.value}`;
+          break;
+        case 'study':
+          inputElement = document.getElementById('studyInput');
+          prompt = `Explain the following study topic in simple terms with clear examples:\n\n${inputElement.value}`;
+          break;
+        case 'ask':
+          inputElement = document.getElementById('askInput');
+          prompt = inputElement.value;
+          break;
+        default:
+          return;
+      }
+      
+      const inputValue = inputElement.value.trim();
+      
+      if (!inputValue) {
+        alert(`Please enter some text to ${type}.`);
+        return;
+      }
+      
+      // Disable button and show loading state
+      disableButton(type);
+      
+      // Create WebSocket connection
+      createWebSocketConnection(prompt, type);
+    }
+
+    function disableButton(type) {
+      const button = document.getElementById(`${type}Btn`);
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+      }
+    }
+
+    function enableButton(type) {
+      const button = document.getElementById(`${type}Btn`);
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = getButtonIcon(type) + getButtonText(type);
+      }
+    }
+
+    function getButtonText(type) {
+      const texts = {
+        'writer': 'Rewrite Text',
+        'translate': 'Translate',
+        'proof': 'Proofread Text',
+        'study': 'Explain Concept',
+        'ask': 'Ask AI'
+      };
+      return texts[type] || 'Process';
+    }
+
+    function getButtonIcon(type) {
+      const icons = {
+        'writer': '<i class="fas fa-magic"></i> ',
+        'translate': '<i class="fas fa-exchange-alt"></i> ',
+        'proof': '<i class="fas fa-check-circle"></i> ',
+        'study': '<i class="fas fa-lightbulb"></i> ',
+        'ask': '<i class="fas fa-question-circle"></i> '
+      };
+      return icons[type] || '<i class="fas fa-cog"></i> ';
+    }
+
+    // Close WebSocket when page unloads
+    window.addEventListener('beforeunload', () => {
+      if (currentWebSocket && currentWebSocket.readyState === WebSocket.OPEN) {
+        currentWebSocket.close();
+      }
+    });
+
+    // Initialize when page loads
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
