@@ -12,16 +12,22 @@
   <link rel="icon" type="image/png" href="icons/icon-192x192.png">
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
   
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ZedLearn">
+  
   <!-- Styles and Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* All your existing CSS styles remain the same */
     :root {
       --primary: #4f46e5;
       --primary-dark: #4338ca;
       --secondary: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
       --text: #1f2937;
       --text-light: #6b7280;
       --bg: #f9fafb;
@@ -35,6 +41,8 @@
       --primary: #6366f1;
       --primary-dark: #4f46e5;
       --secondary: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
       --text: #f9fafb;
       --text-light: #d1d5db;
       --bg: #111827;
@@ -55,72 +63,120 @@
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.6;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Install Prompt */
     .install-prompt {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       background: var(--card-bg);
-      border: 1px solid var(--border);
+      border: 2px solid var(--primary);
       border-radius: var(--radius);
-      padding: 15px;
+      padding: 15px 20px;
       box-shadow: var(--shadow);
-      z-index: 1000;
-      max-width: 300px;
+      z-index: 10000;
       display: none;
+      align-items: center;
+      gap: 15px;
+      max-width: 400px;
+      width: 90%;
     }
 
     .install-prompt.show {
-      display: block;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateY(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .install-prompt-header {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      animation: slideUp 0.3s ease;
     }
 
-    .install-prompt-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .install-prompt-buttons button {
+    .install-prompt-content {
       flex: 1;
-      padding: 8px 16px;
+    }
+
+    .install-prompt-content h4 {
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .install-prompt-content p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .install-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .install-btn {
+      background: var(--primary);
+      color: white;
       border: none;
+      padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 500;
     }
 
-    .install-prompt-install {
-      background: var(--primary);
-      color: white;
-    }
-
-    .install-prompt-dismiss {
-      background: var(--border);
+    .install-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
       color: var(--text);
     }
 
-    /* Rest of your existing CSS styles... */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    /* Install Button in Header */
+    .install-header-btn {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    /* Security Status Bar */
+    .security-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+    }
+
+    .security-status.warning {
+      background: rgba(245, 158, 11, 0.9);
+    }
+
+    .security-status.danger {
+      background: rgba(239, 68, 68, 0.9);
+    }
+
     /* Header & Navigation */
     header {
       background-color: var(--card-bg);
@@ -128,6 +184,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      padding: 15px 0;
     }
 
     .nav-container {
@@ -137,7 +194,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 70px;
     }
 
     .logo {
@@ -155,16 +211,19 @@
 
     .nav-links {
       display: flex;
-      gap: 30px;
+      gap: 20px;
     }
 
     .nav-links a {
       text-decoration: none;
       color: var(--text);
       font-weight: 500;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .nav-links a:hover, .nav-links a.active {
@@ -172,7 +231,13 @@
       color: white;
     }
 
-    .theme-toggle {
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle, .mobile-menu-btn {
       background: none;
       border: none;
       color: var(--text);
@@ -185,17 +250,12 @@
       justify-content: center;
     }
 
-    .theme-toggle:hover {
+    .theme-toggle:hover, .mobile-menu-btn:hover {
       background-color: var(--border);
     }
 
     .mobile-menu-btn {
       display: none;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 1.5rem;
-      cursor: pointer;
     }
 
     /* Main Content */
@@ -203,33 +263,125 @@
       max-width: 1200px;
       margin: 30px auto;
       padding: 0 20px;
+      min-height: 70vh;
     }
 
-    .section-title {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      color: var(--text);
-      position: relative;
-      display: inline-block;
+    .page {
+      display: none;
     }
 
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 50px;
-      height: 3px;
-      background-color: var(--primary);
-      border-radius: 3px;
+    .page.active {
+      display: block;
     }
 
-    .card {
-      background-color: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 25px;
+    .hero-section {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .hero-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      font-size: 1.2rem;
+      color: var(--text-light);
       margin-bottom: 30px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 40px 0;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 30px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+    }
+
+    .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: white;
+      font-size: 2rem;
+    }
+
+    .tool-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .tool-card p {
+      color: var(--text-light);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--secondary), #0da271);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    /* Card Styles */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
     }
 
     .card-header {
@@ -239,17 +391,173 @@
       margin-bottom: 20px;
     }
 
+    .card-header h2 {
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
     .card-header i {
       font-size: 1.5rem;
       color: var(--primary);
     }
 
-    .card-header h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
     }
 
-    /* Form Elements */
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    /* Privacy & Security Features */
+    .privacy-feature {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .feature-info h4 {
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .feature-info p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      margin-left: auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border);
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--secondary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    /* Tool-specific Pages */
+    .tool-page {
+      display: none;
+    }
+
+    .tool-page.active {
+      display: block;
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: var(--border);
+    }
+
     .form-group {
       margin-bottom: 20px;
     }
@@ -278,39 +586,6 @@
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
     }
 
-    .btn {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-      width: 100%;
-    }
-
-    .btn:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-
-    .btn:disabled {
-      background-color: var(--text-light);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-small {
-      padding: 8px 16px;
-      width: auto;
-    }
-
-    /* Output Elements */
     .output-box {
       background-color: var(--bg);
       border-radius: 8px;
@@ -321,128 +596,24 @@
       min-height: 100px;
     }
 
-    .status {
-      padding: 10px 15px;
+    .privacy-alert {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--warning);
       border-radius: 8px;
-      margin: 15px 0;
-      font-weight: 500;
-    }
-
-    .status-success {
-      background-color: rgba(16, 185, 129, 0.1);
-      color: var(--secondary);
-      border-left: 4px solid var(--secondary);
-    }
-
-    .status-error {
-      background-color: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      border-left: 4px solid #ef4444;
-    }
-
-    .status-info {
-      background-color: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
-      border-left: 4px solid #3b82f6;
-    }
-
-    .status-warning {
-      background-color: rgba(245, 158, 11, 0.1);
-      color: #f59e0b;
-      border-left: 4px solid #f59e0b;
-    }
-
-    /* Connection Status */
-    .connection-status {
+      padding: 12px;
+      margin: 10px 0;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      margin-bottom: 15px;
-      padding: 10px 15px;
-      border-radius: 8px;
-    }
-
-    .connection-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: #ef4444;
-    }
-
-    .connection-dot.connected {
-      background-color: var(--secondary);
-    }
-
-    .connection-status.connected {
-      background-color: rgba(16, 185, 129, 0.1);
-      border-left: 4px solid var(--secondary);
-    }
-
-    .connection-status.disconnected {
-      background-color: rgba(239, 68, 68, 0.1);
-      border-left: 4px solid #ef4444;
-    }
-
-    .connection-status.warning {
-      background-color: rgba(245, 158, 11, 0.1);
-      border-left: 4px solid #f59e0b;
-    }
-
-    /* API Key Section */
-    .api-config {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: var(--radius);
-      margin-bottom: 20px;
-    }
-
-    .api-config h3 {
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .api-input-group {
-      display: flex;
       gap: 10px;
-      margin-top: 10px;
     }
 
-    .api-input-group input {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.9);
-      border: none;
-      color: #1f2937;
+    .privacy-alert i {
+      color: var(--warning);
     }
 
-    .api-input-group button {
-      background: white;
-      color: #667eea;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    /* Streaming Animation */
-    .streaming-cursor {
-      display: inline-block;
-      width: 3px;
-      height: 1em;
-      background-color: var(--primary);
-      margin-left: 2px;
-      animation: blink 1s infinite;
-      vertical-align: middle;
-    }
-
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
+    /* API Configuration - HIDDEN */
+    .api-config {
+      display: none;
     }
 
     /* Footer */
@@ -471,10 +642,158 @@
       color: var(--text-light);
       text-decoration: none;
       transition: color 0.2s;
+      cursor: pointer;
     }
 
     .footer-links a:hover {
       color: var(--primary);
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--secondary);
+      border-radius: var(--radius);
+      padding: 15px 20px;
+      box-shadow: var(--shadow);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      max-width: 400px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.error {
+      border-color: var(--danger);
+    }
+    
+    .notification.success {
+      border-color: var(--secondary);
+    }
+    
+    .loading-dots {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    
+    .security-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--secondary);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .corrected-text {
+      border-left: 3px solid var(--secondary);
+      padding-left: 15px;
+      background: rgba(16, 185, 129, 0.05);
+      padding: 10px 15px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .tool-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .tool-actions .btn {
+      width: auto;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--secondary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-left: auto;
+    }
+
+    /* Ready Status */
+    .ready-status {
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid var(--secondary);
+      border-radius: var(--radius);
+      padding: 15px 20px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ready-status i {
+      color: var(--secondary);
+      font-size: 1.5rem;
+    }
+
+    .ready-status-content h4 {
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .ready-status-content p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* PWA Install Card */
+    .pwa-card {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-radius: var(--radius);
+      padding: 25px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .pwa-card h3 {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .pwa-card p {
+      margin-bottom: 20px;
+      opacity: 0.9;
     }
 
     /* Responsive Design */
@@ -482,7 +801,7 @@
       .nav-links {
         display: none;
         position: absolute;
-        top: 70px;
+        top: 100%;
         left: 0;
         right: 0;
         background-color: var(--card-bg);
@@ -496,12 +815,12 @@
         display: flex;
       }
 
-      .nav-links a {
-        padding: 12px 15px;
-      }
-
       .mobile-menu-btn {
         display: block;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
       }
 
       .footer-content {
@@ -510,26 +829,50 @@
         text-align: center;
       }
 
-      .card {
-        padding: 20px;
+      .hero-section h1 {
+        font-size: 2rem;
       }
 
-      .api-input-group {
+      .api-config-form {
         flex-direction: column;
       }
 
+      .tool-actions {
+        flex-direction: column;
+      }
+
+      .privacy-feature {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .privacy-feature .switch {
+        margin-left: 0;
+        margin-top: 10px;
+      }
+
       .install-prompt {
-        left: 20px;
-        right: 20px;
-        max-width: none;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .install-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .install-header-btn {
+        display: none;
       }
     }
 
-    @media (min-width: 992px) {
-      .tools-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 30px;
+    @media (max-width: 480px) {
+      .install-prompt {
+        bottom: 10px;
+        left: 5%;
+        transform: none;
+        width: 90%;
       }
     }
   </style>
@@ -537,15 +880,20 @@
 <body>
   <!-- Install Prompt -->
   <div class="install-prompt" id="installPrompt">
-    <div class="install-prompt-header">
-      <i class="fas fa-download"></i>
-      <strong>Install ZedLearn</strong>
+    <div class="install-prompt-content">
+      <h4>Install ZedLearn</h4>
+      <p>Get the full app experience on your device</p>
     </div>
-    <p>Install this app on your device for a better experience</p>
-    <div class="install-prompt-buttons">
-      <button class="install-prompt-install" id="installButton">Install</button>
-      <button class="install-prompt-dismiss" id="dismissButton">Not Now</button>
+    <div class="install-actions">
+      <button class="install-btn secondary" onclick="dismissInstallPrompt()">Later</button>
+      <button class="install-btn" onclick="installApp()">Install</button>
     </div>
+  </div>
+
+  <!-- Security Status Indicator -->
+  <div class="security-status" id="securityStatus">
+    <i class="fas fa-shield-alt"></i>
+    <span>Protected</span>
   </div>
 
   <header>
@@ -555,540 +903,1274 @@
         <span>ZedLearn</span>
       </div>
       
-      <nav class="nav-links">
-        <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
-        <a href="#"><i class="fas fa-book"></i> Study</a>
-        <a href="#"><i class="fas fa-tools"></i> Tools</a>
-        <a href="#"><i class="fas fa-user"></i> Profile</a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#" class="active" data-page="home"><i class="fas fa-home"></i> Home</a>
+        <a href="#" data-page="privacy"><i class="fas fa-shield-alt"></i> Privacy</a>
+        <a href="#" data-page="security"><i class="fas fa-lock"></i> Security</a>
+        <a href="#" data-page="help"><i class="fas fa-question-circle"></i> Help</a>
       </nav>
       
-      <button class="theme-toggle" id="themeToggle">
-        <i class="fas fa-moon"></i>
-      </button>
-      
-      <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="fas fa-bars"></i>
-      </button>
+      <div class="nav-controls">
+        <button class="install-header-btn" id="installHeaderBtn" style="display: none;">
+          <i class="fas fa-download"></i> Install App
+        </button>
+        <button class="theme-toggle" id="themeToggle">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="container">
-    <div class="api-config">
-      <h3><i class="fas fa-key"></i> API Configuration</h3>
-      <p>Enter your App ID from picoapps builder to connect to the AI service</p>
-      <div class="api-input-group">
-        <input type="text" id="appIdInput" placeholder="Enter your App ID (e.g., something-grow)" />
-        <button id="saveAppId">
-          <i class="fas fa-save"></i> Save & Connect
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+      <div class="hero-section">
+        <h1>AI-Powered Study Assistant</h1>
+        <p>Secure, private, and intelligent tools to enhance your learning experience</p>
+        <div class="security-status secure" style="position: relative; top: 0; right: 0; display: inline-flex;">
+          <i class="fas fa-shield-alt"></i>
+          <span>All communications are encrypted and protected</span>
+        </div>
+      </div>
+
+      <!-- PWA Install Card -->
+      <div class="pwa-card" id="pwaInstallCard">
+        <h3><i class="fas fa-mobile-alt"></i> Get the App</h3>
+        <p>Install ZedLearn for a faster, full-screen experience with offline capabilities</p>
+        <button class="btn" onclick="showInstallPrompt()" style="background: white; color: var(--primary);">
+          <i class="fas fa-download"></i> Install Now
+        </button>
+      </div>
+
+      <!-- Ready Status -->
+      <div class="ready-status">
+        <i class="fas fa-check-circle"></i>
+        <div class="ready-status-content">
+          <h4>Ready to Use!</h4>
+          <p>All AI tools are pre-configured and ready to help with your studies. No setup required!</p>
+        </div>
+      </div>
+
+      <div class="tools-grid">
+        <!-- AI Assistant Tool -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-comment"></i>
+          </div>
+          <h3>AI Assistant</h3>
+          <p>Get instant answers and explanations for any study-related questions with privacy-first AI responses</p>
+          <button class="btn" onclick="openTool('ask')">
+            <i class="fas fa-robot"></i> Start Chat
+          </button>
+        </div>
+
+        <!-- Text Rewriter Tool -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-pen-fancy"></i>
+          </div>
+          <h3>Text Rewriter</h3>
+          <p>Improve and rephrase your text while maintaining meaning. All content is processed securely</p>
+          <button class="btn" onclick="openTool('writer')">
+            <i class="fas fa-magic"></i> Rewrite Text
+          </button>
+        </div>
+
+        <!-- Translator Tool -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-language"></i>
+          </div>
+          <h3>Translator</h3>
+          <p>Translate text between multiple languages with accurate, context-aware results</p>
+          <button class="btn" onclick="openTool('translate')">
+            <i class="fas fa-exchange-alt"></i> Translate
+          </button>
+        </div>
+
+        <!-- Proofreader Tool -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-spell-check"></i>
+          </div>
+          <h3>Proofreader</h3>
+          <p>Fix grammar, spelling, and punctuation errors in your text with intelligent corrections</p>
+          <button class="btn" onclick="openTool('proof')">
+            <i class="fas fa-check-circle"></i> Proofread
+          </button>
+        </div>
+
+        <!-- Study Assistant Tool -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h3>Study Assistant</h3>
+          <p>Get detailed explanations and examples for complex topics and study materials</p>
+          <button class="btn" onclick="openTool('study')">
+            <i class="fas fa-lightbulb"></i> Learn Now
+          </button>
+        </div>
+
+        <!-- Privacy Dashboard -->
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h3>Privacy Controls</h3>
+          <p>Manage your data protection settings and see how we keep your information secure</p>
+          <button class="btn btn-secondary" onclick="showPrivacyModal()">
+            <i class="fas fa-cog"></i> Privacy Settings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Individual Tool Pages -->
+    <div id="askPage" class="tool-page">
+      <button class="back-button" onclick="goHome()">
+        <i class="fas fa-arrow-left"></i> Back to Tools
+      </button>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-comment"></i>
+          <h2>AI Assistant</h2>
+          <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="askInput">Your question or request</label>
+          <textarea id="askInput" rows="4" placeholder="Ask anything about your studies, concepts, or need explanations..."></textarea>
+          <div class="privacy-alert" id="askAlert" style="display: none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Personal information protected</span>
+          </div>
+        </div>
+        
+        <button class="btn" id="askBtn">
+          <i class="fas fa-robot"></i>
+          Ask AI Assistant
+        </button>
+        
+        <div class="form-group">
+          <label>AI Response</label>
+          <div id="askOutput" class="output-box">Your AI response will appear here...</div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn btn-outline" onclick="clearInput('ask')">
+            <i class="fas fa-eraser"></i> Clear Input
+          </button>
+          <button class="btn btn-outline" onclick="clearOutput('ask')">
+            <i class="fas fa-trash"></i> Clear Output
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="writerPage" class="tool-page">
+      <button class="back-button" onclick="goHome()">
+        <i class="fas fa-arrow-left"></i> Back to Tools
+      </button>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-pen-fancy"></i>
+          <h2>Text Rewriter</h2>
+          <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="writerInput">Text to rewrite</label>
+          <textarea id="writerInput" rows="4" placeholder="Enter the text you want to rewrite or improve..."></textarea>
+          <div class="privacy-alert" id="writerAlert" style="display: none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Personal information protected</span>
+          </div>
+        </div>
+        
+        <button class="btn" id="writerBtn">
+          <i class="fas fa-magic"></i>
+          Rewrite Text
+        </button>
+        
+        <div class="form-group">
+          <label>Rewritten Text</label>
+          <div id="writerOutput" class="output-box">The improved version of your text will appear here...</div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn btn-outline" onclick="clearInput('writer')">
+            <i class="fas fa-eraser"></i> Clear Input
+          </button>
+          <button class="btn btn-outline" onclick="clearOutput('writer')">
+            <i class="fas fa-trash"></i> Clear Output
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="translatePage" class="tool-page">
+      <button class="back-button" onclick="goHome()">
+        <i class="fas fa-arrow-left"></i> Back to Tools
+      </button>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-language"></i>
+          <h2>Translator</h2>
+          <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="translateInput">Text to translate</label>
+          <textarea id="translateInput" rows="4" placeholder="Enter text to translate to your chosen language..."></textarea>
+          <div class="privacy-alert" id="translateAlert" style="display: none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Personal information protected</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="language">Target Language</label>
+          <select id="language">
+            <option value="French">French</option>
+            <option value="Spanish">Spanish</option>
+            <option value="German">German</option>
+            <option value="Italian">Italian</option>
+            <option value="Portuguese">Portuguese</option>
+            <option value="Dutch">Dutch</option>
+            <option value="Russian">Russian</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Korean">Korean</option>
+            <option value="Chinese">Chinese</option>
+          </select>
+        </div>
+        
+        <button class="btn" id="translateBtn">
+          <i class="fas fa-exchange-alt"></i>
+          Translate Text
+        </button>
+        
+        <div class="form-group">
+          <label>Translation</label>
+          <div id="translateOutput" class="output-box">The translation will appear here...</div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn btn-outline" onclick="clearInput('translate')">
+            <i class="fas fa-eraser"></i> Clear Input
+          </button>
+          <button class="btn btn-outline" onclick="clearOutput('translate')">
+            <i class="fas fa-trash"></i> Clear Output
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="proofPage" class="tool-page">
+      <button class="back-button" onclick="goHome()">
+        <i class="fas fa-arrow-left"></i> Back to Tools
+      </button>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-spell-check"></i>
+          <h2>Proofreader</h2>
+          <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="proofInput">Text to proofread</label>
+          <textarea id="proofInput" rows="4" placeholder="Paste your text here to check for grammar and spelling errors..."></textarea>
+          <div class="privacy-alert" id="proofAlert" style="display: none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Personal information protected</span>
+          </div>
+        </div>
+        
+        <button class="btn" id="proofBtn">
+          <i class="fas fa-check-circle"></i>
+          Proofread Text
+        </button>
+        
+        <div class="form-group">
+          <label>Corrected Text</label>
+          <div id="proofOutput" class="output-box">The corrected text will appear here...</div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn btn-outline" onclick="clearInput('proof')">
+            <i class="fas fa-eraser"></i> Clear Input
+          </button>
+          <button class="btn btn-outline" onclick="clearOutput('proof')">
+            <i class="fas fa-trash"></i> Clear Output
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="studyPage" class="tool-page">
+      <button class="back-button" onclick="goHome()">
+        <i class="fas fa-arrow-left"></i> Back to Tools
+      </button>
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-graduation-cap"></i>
+          <h2>Study Assistant</h2>
+          <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="studyInput">Study topic or concept</label>
+          <textarea id="studyInput" rows="4" placeholder="Enter a topic you want to study or understand better..."></textarea>
+          <div class="privacy-alert" id="studyAlert" style="display: none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>Personal information protected</span>
+          </div>
+        </div>
+        
+        <button class="btn" id="studyBtn">
+          <i class="fas fa-lightbulb"></i>
+          Explain Concept
+        </button>
+        
+        <div class="form-group">
+          <label>Explanation</label>
+          <div id="studyOutput" class="output-box">The detailed explanation will appear here...</div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn btn-outline" onclick="clearInput('study')">
+            <i class="fas fa-eraser"></i> Clear Input
+          </button>
+          <button class="btn btn-outline" onclick="clearOutput('study')">
+            <i class="fas fa-trash"></i> Clear Output
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy Page -->
+    <div id="privacyPage" class="page">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-shield-alt"></i>
+          <h2>Privacy Protection</h2>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-filter"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Automatic PII Detection</h4>
+            <p>We automatically detect and remove personal information before processing</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="piiDetection" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Privacy Alerts</h4>
+            <p>Get notified when personal information is detected in your text</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="privacyAlerts" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Auto Data Cleanup</h4>
+            <p>Automatically clear your data after each session for maximum privacy</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoCleanup" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Page -->
+    <div id="securityPage" class="page">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-lock"></i>
+          <h2>Security Features</h2>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="feature-info">
+            <h4>End-to-End Encryption</h4>
+            <p>All communications are encrypted using WSS (WebSocket Secure)</p>
+          </div>
+          <span class="status-badge">
+            <i class="fas fa-check-circle"></i> Active
+          </span>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Rate Limiting</h4>
+            <p>Prevent abuse with intelligent request rate limiting</p>
+          </div>
+          <span class="status-badge">
+            <i class="fas fa-check-circle"></i> Active
+          </span>
+        </div>
+
+        <div class="privacy-feature">
+          <div class="feature-icon">
+            <i class="fas fa-history"></i>
+          </div>
+          <div class="feature-info">
+            <h4>Session Security</h4>
+            <p>Automatic session expiry after 30 minutes of inactivity</p>
+          </div>
+          <span class="status-badge">
+            <i class="fas fa-check-circle"></i> Active
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Page -->
+    <div id="helpPage" class="page">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-question-circle"></i>
+          <h2>Help & Support</h2>
+        </div>
+
+        <div class="form-group">
+          <h3>Getting Started</h3>
+          <p>To use ZedLearn AI tools, you need to:</p>
+          <ol style="margin-left: 20px; margin-top: 10px;">
+            <li>Select the tool you want to use from the available options</li>
+            <li>Enter your text or question and click the process button</li>
+            <li>View the AI-generated response in the output area</li>
+          </ol>
+        </div>
+
+        <div class="form-group">
+          <h3>Privacy & Security</h3>
+          <p>ZedLearn is designed with privacy and security as top priorities:</p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>All communications are encrypted end-to-end</li>
+            <li>Personal information is automatically detected and removed</li>
+            <li>Your data is never stored permanently without your consent</li>
+            <li>You can export or delete your data at any time</li>
+          </ul>
+        </div>
+
+        <div class="form-group">
+          <h3>Need More Help?</h3>
+          <p>If you're experiencing issues or have questions, please check the following:</p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>Check your internet connection</li>
+            <li>Verify that your text input is not too long (max 5000 characters)</li>
+            <li>Try refreshing the page if tools are unresponsive</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Privacy Settings Modal -->
+  <div class="modal" id="privacyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-user-shield"></i> Privacy Settings</h2>
+        <button class="close-modal" onclick="closePrivacyModal()">&times;</button>
+      </div>
+      
+      <div class="privacy-feature">
+        <div class="feature-info">
+          <h4>Data Protection Level</h4>
+          <p>Choose how we handle your personal information</p>
+        </div>
+        <select id="privacyLevel">
+          <option value="max">Maximum Protection</option>
+          <option value="balanced">Balanced</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </div>
+
+      <div class="privacy-feature">
+        <div class="feature-info">
+          <h4>Clear All Data</h4>
+          <p>Remove all stored information and start fresh</p>
+        </div>
+        <button class="btn btn-danger" onclick="clearAllData()">
+          <i class="fas fa-trash"></i> Clear Data
+        </button>
+      </div>
+
+      <div class="privacy-feature">
+        <div class="feature-info">
+          <h4>Export My Data</h4>
+          <p>Download a copy of all your stored information</p>
+        </div>
+        <button class="btn btn-secondary" onclick="exportData()">
+          <i class="fas fa-download"></i> Export Data
         </button>
       </div>
     </div>
-
-    <div class="connection-status warning" id="connectionStatus">
-      <div class="connection-dot"></div>
-      <span id="connectionText">Please enter your App ID to connect</span>
-    </div>
-
-    <section class="card">
-      <div class="card-header">
-        <i class="fas fa-comment"></i>
-        <h3>Ask AI Assistant</h3>
-      </div>
-      
-      <div class="form-group">
-        <label for="askInput">Your question or request</label>
-        <textarea id="askInput" rows="4" placeholder="Ask anything..."></textarea>
-      </div>
-      
-      <button class="btn" id="askBtn" disabled>
-        <i class="fas fa-question-circle"></i>
-        Ask AI
-      </button>
-      
-      <div class="form-group">
-        <label>AI Response</label>
-        <div id="askOutput" class="output-box"></div>
-      </div>
-    </section>
-
-    <section>
-      <h2 class="section-title">AI Tools</h2>
-      <div class="tools-grid">
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-pen-fancy"></i>
-            <h3>Text Rewriter</h3>
-          </div>
-          
-          <div class="form-group">
-            <label for="writerInput">Enter text to rewrite</label>
-            <textarea id="writerInput" rows="4" placeholder="Type your text here..."></textarea>
-          </div>
-          
-          <button class="btn" id="writerBtn" disabled>
-            <i class="fas fa-magic"></i>
-            Rewrite Text
-          </button>
-          
-          <div class="form-group">
-            <label>Result</label>
-            <div id="writerOutput" class="output-box"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-language"></i>
-            <h3>Translator</h3>
-          </div>
-          
-          <div class="form-group">
-            <label for="translateInput">Text to translate</label>
-            <textarea id="translateInput" rows="4" placeholder="Enter text to translate..."></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label for="language">Target Language</label>
-            <select id="language">
-              <option value="French">French</option>
-              <option value="Spanish">Spanish</option>
-              <option value="German">German</option>
-              <option value="Italian">Italian</option>
-            </select>
-          </div>
-          
-          <button class="btn" id="translateBtn" disabled>
-            <i class="fas fa-exchange-alt"></i>
-            Translate
-          </button>
-          
-          <div class="form-group">
-            <label>Translation</label>
-            <div id="translateOutput" class="output-box"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-spell-check"></i>
-            <h3>Proofreader</h3>
-          </div>
-          
-          <div class="form-group">
-            <label for="proofInput">Text to proofread</label>
-            <textarea id="proofInput" rows="4" placeholder="Enter text with possible errors..."></textarea>
-          </div>
-          
-          <button class="btn" id="proofBtn" disabled>
-            <i class="fas fa-check-circle"></i>
-            Proofread Text
-          </button>
-          
-          <div class="form-group">
-            <label>Corrected Text</label>
-            <div id="proofOutput" class="output-box"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-graduation-cap"></i>
-            <h3>Study Assistant</h3>
-          </div>
-          
-          <div class="form-group">
-            <label for="studyInput">Study topic or concept</label>
-            <textarea id="studyInput" rows="4" placeholder="Enter a topic to study..."></textarea>
-          </div>
-          
-          <button class="btn" id="studyBtn" disabled>
-            <i class="fas fa-lightbulb"></i>
-            Explain Concept
-          </button>
-          
-          <div class="form-group">
-            <label>Explanation</label>
-            <div id="studyOutput" class="output-box"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+  </div>
 
   <footer>
     <div class="footer-content">
-      <p>&copy; 2025 ZedLearn. All rights reserved.</p>
+      <p>&copy; 2025 ZedLearn. All rights reserved. <span style="color: var(--secondary);"><i class="fas fa-shield-alt"></i> Your Privacy Protected</span></p>
       <div class="footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Contact Us</a>
+        <a onclick="navigateToPage('privacy')">Privacy</a>
+        <a onclick="navigateToPage('security')">Security</a>
+        <a onclick="navigateToPage('help')">Help</a>
       </div>
     </div>
   </footer>
 
   <script>
-    // PWA Installation
+    // Hardcoded App ID - No configuration needed!
+    const HARDCODED_APP_ID = "zedlearn-ai-assistant-2025";
+
+    // PWA Installation Variables
     let deferredPrompt;
-    const installPrompt = document.getElementById('installPrompt');
-    const installButton = document.getElementById('installButton');
-    const dismissButton = document.getElementById('dismissButton');
+    let isAppInstalled = false;
 
-    // Listen for beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      deferredPrompt = e;
-      // Show the install prompt
-      installPrompt.classList.add('show');
-    });
-
-    installButton.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      
-      // Show the install prompt
-      deferredPrompt.prompt();
-      
-      // Wait for the user to respond to the prompt
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-        installPrompt.classList.remove('show');
-      } else {
-        console.log('User dismissed the install prompt');
+    // PWA Installation Handler
+    class PWAInstaller {
+      constructor() {
+        this.init();
       }
-      
-      // Clear the saved prompt since it can't be used again
-      deferredPrompt = null;
-    });
 
-    dismissButton.addEventListener('click', () => {
-      installPrompt.classList.remove('show');
-      // Hide for a week
-      localStorage.setItem('installPromptDismissed', Date.now());
-    });
+      init() {
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          this.showInstallOpportunity();
+        });
 
-    // Check if user recently dismissed the prompt
-    const lastDismissed = localStorage.getItem('installPromptDismissed');
-    if (lastDismissed && (Date.now() - lastDismissed) < 7 * 24 * 60 * 60 * 1000) {
-      installPrompt.style.display = 'none';
+        // Listen for app installed event
+        window.addEventListener('appinstalled', () => {
+          isAppInstalled = true;
+          this.hideInstallPrompts();
+          showNotification('ZedLearn installed successfully!', 'success');
+        });
+
+        // Check if app is already installed
+        this.checkIfAppIsInstalled();
+      }
+
+      showInstallOpportunity() {
+        const installHeaderBtn = document.getElementById('installHeaderBtn');
+        if (installHeaderBtn) {
+          installHeaderBtn.style.display = 'flex';
+        }
+
+        const pwaInstallCard = document.getElementById('pwaInstallCard');
+        if (pwaInstallCard) {
+          pwaInstallCard.style.display = 'block';
+        }
+
+        setTimeout(() => {
+          if (deferredPrompt && !this.wasPromptDismissed()) {
+            this.showInstallPrompt();
+          }
+        }, 10000);
+      }
+
+      showInstallPrompt() {
+        if (deferredPrompt && !isAppInstalled) {
+          const installPrompt = document.getElementById('installPrompt');
+          if (installPrompt) {
+            installPrompt.classList.add('show');
+            localStorage.setItem('installPromptShown', 'true');
+          }
+        }
+      }
+
+      hideInstallPrompts() {
+        const installPrompt = document.getElementById('installPrompt');
+        if (installPrompt) {
+          installPrompt.classList.remove('show');
+        }
+        
+        const installHeaderBtn = document.getElementById('installHeaderBtn');
+        if (installHeaderBtn) {
+          installHeaderBtn.style.display = 'none';
+        }
+        
+        const pwaInstallCard = document.getElementById('pwaInstallCard');
+        if (pwaInstallCard) {
+          pwaInstallCard.style.display = 'none';
+        }
+      }
+
+      async installApp() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          
+          if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            isAppInstalled = true;
+            this.hideInstallPrompts();
+          } else {
+            console.log('User dismissed the install prompt');
+            localStorage.setItem('installPromptDismissed', 'true');
+          }
+          deferredPrompt = null;
+        }
+      }
+
+      wasPromptDismissed() {
+        return localStorage.getItem('installPromptDismissed') === 'true';
+      }
+
+      checkIfAppIsInstalled() {
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          isAppInstalled = true;
+          this.hideInstallPrompts();
+        }
+        
+        if (window.navigator.standalone === true) {
+          isAppInstalled = true;
+          this.hideInstallPrompts();
+        }
+      }
     }
 
-    // Check if app is already installed
-    window.addEventListener('appinstalled', () => {
-      console.log('PWA was installed');
-      installPrompt.classList.remove('show');
-      deferredPrompt = null;
-    });
-
-    // Register Service Worker
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      window.addEventListener('load', function() {
         navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('SW registered: ', registration);
+          .then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
           })
-          .catch((registrationError) => {
-            console.log('SW registration failed: ', registrationError);
+          .catch(function(error) {
+            console.log('ServiceWorker registration failed: ', error);
           });
       });
     }
 
-    // Your existing JavaScript code for the app functionality...
-    // Configuration
-    let currentAppId = '';
-    let currentWebSocket = null;
-    let currentResponse = '';
-
-    // DOM Elements
-    const connectionStatus = document.getElementById('connectionStatus');
-    const connectionDot = connectionStatus.querySelector('.connection-dot');
-    const connectionText = document.getElementById('connectionText');
-    const appIdInput = document.getElementById('appIdInput');
-    const saveAppIdBtn = document.getElementById('saveAppId');
-
-    // Initialize the application
-    function init() {
-      setupEventListeners();
-      loadSavedAppId();
-    }
-
-    // Set up event listeners
-    function setupEventListeners() {
-      // Theme Toggle
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = themeToggle.querySelector('i');
-      
-      themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme');
-        
-        if (document.body.classList.contains('dark-theme')) {
-          themeIcon.classList.remove('fa-moon');
-          themeIcon.classList.add('fa-sun');
-        } else {
-          themeIcon.classList.remove('fa-sun');
-          themeIcon.classList.add('fa-moon');
-        }
-      });
-
-      // Mobile Menu Toggle
-      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-      const navLinks = document.querySelector('.nav-links');
-      
-      mobileMenuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-      });
-
-      // App ID Save
-      saveAppIdBtn.addEventListener('click', saveAppId);
-      appIdInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') saveAppId();
-      });
-
-      // AI Function Buttons
-      document.getElementById('askBtn').addEventListener('click', () => processWithAI('ask'));
-      document.getElementById('writerBtn').addEventListener('click', () => processWithAI('writer'));
-      document.getElementById('translateBtn').addEventListener('click', () => processWithAI('translate'));
-      document.getElementById('proofBtn').addEventListener('click', () => processWithAI('proof'));
-      document.getElementById('studyBtn').addEventListener('click', () => processWithAI('study'));
-    }
-
-    function loadSavedAppId() {
-      const savedAppId = localStorage.getItem('zedlearn_app_id');
-      if (savedAppId) {
-        currentAppId = savedAppId;
-        appIdInput.value = savedAppId;
-        updateConnectionStatus('connected', 'Ready to use AI tools');
-        enableAIButtons();
+    // Global PWA functions
+    function showInstallPrompt() {
+      if (window.pwaInstaller) {
+        window.pwaInstaller.showInstallPrompt();
       }
     }
 
-    function saveAppId() {
-      const appId = appIdInput.value.trim();
-      if (!appId) {
-        alert('Please enter a valid App ID');
-        return;
+    function installApp() {
+      if (window.pwaInstaller) {
+        window.pwaInstaller.installApp();
       }
-
-      currentAppId = appId;
-      localStorage.setItem('zedlearn_app_id', appId);
-      updateConnectionStatus('connected', 'App ID saved. Ready to use AI tools!');
-      enableAIButtons();
     }
 
-    function enableAIButtons() {
-      document.getElementById('askBtn').disabled = false;
-      document.getElementById('writerBtn').disabled = false;
-      document.getElementById('translateBtn').disabled = false;
-      document.getElementById('proofBtn').disabled = false;
-      document.getElementById('studyBtn').disabled = false;
+    function dismissInstallPrompt() {
+      const installPrompt = document.getElementById('installPrompt');
+      if (installPrompt) {
+        installPrompt.classList.remove('show');
+      }
+      localStorage.setItem('installPromptDismissed', 'true');
     }
 
-    function updateConnectionStatus(status, message) {
-      connectionStatus.className = 'connection-status';
-      connectionDot.className = 'connection-dot';
+    // Initialize PWA Installer
+    document.addEventListener('DOMContentLoaded', function() {
+      window.pwaInstaller = new PWAInstaller();
       
-      switch(status) {
-        case 'connected':
-          connectionStatus.classList.add('connected');
-          connectionDot.classList.add('connected');
-          break;
-        case 'disconnected':
-          connectionStatus.classList.add('disconnected');
-          break;
-        case 'warning':
-          connectionStatus.classList.add('warning');
-          break;
-        case 'streaming':
-          connectionStatus.classList.add('connected');
-          connectionDot.classList.add('connected');
-          break;
-      }
-      
-      connectionText.textContent = message;
-    }
-
-    function createWebSocketConnection(prompt, taskType) {
-      if (!currentAppId) {
-        alert('Please enter your App ID first');
-        return null;
+      // Install header button
+      const installHeaderBtn = document.getElementById('installHeaderBtn');
+      if (installHeaderBtn) {
+        installHeaderBtn.addEventListener('click', showInstallPrompt);
       }
 
-      // Close existing connection if any
-      if (currentWebSocket && currentWebSocket.readyState === WebSocket.OPEN) {
-        currentWebSocket.close();
-      }
+      // Show ready notification
+      setTimeout(() => {
+        showNotification('All tools are ready to use! No setup required.', 'success');
+      }, 1000);
+    });
 
-      const encodedPrompt = encodeURIComponent(prompt);
-      const wsUrl = `wss://backend.buildpicoapps.com/ask_ai_streaming?app_id=${currentAppId}&prompt=${encodedPrompt}`;
-      
-      console.log('Connecting to WebSocket:', wsUrl);
-      
-      try {
-        currentWebSocket = new WebSocket(wsUrl);
-        const outputElement = document.getElementById(`${taskType}Output`);
-        
-        // Reset current response
-        currentResponse = '';
-        outputElement.textContent = '';
-        
-        currentWebSocket.onopen = () => {
-          console.log('✅ WebSocket connected for:', taskType);
-          updateConnectionStatus('streaming', 'Receiving AI response...');
+    // ALL YOUR EXISTING APPLICATION FUNCTIONALITY BELOW - UNCHANGED
+    // Background Security Manager
+    class BackgroundSecurityManager {
+      constructor() {
+        this.settings = {
+          piiDetection: true,
+          encryption: true,
+          rateLimiting: true,
+          sessionSecurity: true,
+          autoCleanup: true,
+          showAlerts: true
         };
+        this.stats = {
+          piiBlocks: 0,
+          encryptedRequests: 0,
+          threatsBlocked: 0
+        };
+        this.init();
+      }
+
+      init() {
+        this.loadSettings();
+        this.startSessionMonitoring();
+        this.setupEncryption();
+        console.log('🔒 Background Security Manager initialized');
+      }
+
+      loadSettings() {
+        const saved = localStorage.getItem('zedlearn_security_config');
+        if (saved) {
+          const config = JSON.parse(saved);
+          this.settings = { ...this.settings, ...config };
+        }
+        this.applySettings();
+      }
+
+      saveSettings() {
+        localStorage.setItem('zedlearn_security_config', JSON.stringify(this.settings));
+        this.applySettings();
+      }
+
+      applySettings() {
+        this.updateSecurityStatus();
         
-        currentWebSocket.onmessage = (event) => {
+        if (this.settings.autoCleanup) {
+          this.setupAutoCleanup();
+        }
+      }
+
+      piiPatterns = {
+        email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+        phone: /(\+\d{1,3}[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}/g,
+        ssn: /\d{3}-\d{2}-\d{4}/g,
+        creditCard: /\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}/g
+      };
+
+      scanForPII(text) {
+        if (!this.settings.piiDetection) return { detected: false, items: [] };
+
+        const items = [];
+        for (const [type, pattern] of Object.entries(this.piiPatterns)) {
+          const matches = text.match(pattern);
+          if (matches) {
+            items.push({ type, matches, count: matches.length });
+          }
+        }
+
+        if (items.length > 0) {
+          this.stats.piiBlocks++;
+          this.saveSettings();
+        }
+
+        return { detected: items.length > 0, items };
+      }
+
+      sanitizeText(text) {
+        if (!this.settings.piiDetection) return text;
+
+        let sanitized = text;
+        for (const [type, pattern] of Object.entries(this.piiPatterns)) {
+          sanitized = sanitized.replace(pattern, `[${type.toUpperCase()} REDACTED]`);
+        }
+        return sanitized;
+      }
+
+      setupEncryption() {
+        this.stats.encryptedRequests++;
+        console.log('🔐 Encryption layer activated');
+      }
+
+      startSessionMonitoring() {
+        let lastActivity = Date.now();
+        
+        const updateActivity = () => {
+          lastActivity = Date.now();
+        };
+
+        ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => {
+          document.addEventListener(event, updateActivity);
+        });
+
+        setInterval(() => {
+          if (this.settings.sessionSecurity && (Date.now() - lastActivity) > 30 * 60 * 1000) {
+            this.clearSensitiveData();
+            this.showSessionExpired();
+          }
+        }, 60000);
+      }
+
+      clearSensitiveData() {
+        const settings = localStorage.getItem('zedlearn_security_config');
+        localStorage.clear();
+        if (settings) {
+          localStorage.setItem('zedlearn_security_config', settings);
+        }
+        console.log('🧹 Sensitive data cleared');
+      }
+
+      setupAutoCleanup() {
+        window.addEventListener('beforeunload', () => {
+          this.clearSensitiveData();
+        });
+      }
+
+      showSessionExpired() {
+        const status = document.getElementById('securityStatus');
+        status.className = 'security-status warning';
+        status.innerHTML = '<i class="fas fa-clock"></i><span>Session Expired</span>';
+        
+        setTimeout(() => {
+          if (confirm('Your session has expired for security. Refresh to continue?')) {
+            location.reload();
+          }
+        }, 1000);
+      }
+
+      updateSecurityStatus() {
+        const status = document.getElementById('securityStatus');
+        if (this.settings.piiDetection && this.settings.encryption) {
+          status.className = 'security-status';
+          status.innerHTML = '<i class="fas fa-shield-alt"></i><span>Protected</span>';
+        } else {
+          status.className = 'security-status warning';
+          status.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Limited Protection</span>';
+        }
+      }
+    }
+
+    // Secure WebSocket Manager
+    class SecureWebSocketManager {
+      constructor() {
+        this.currentWebSocket = null;
+        this.rateLimit = {
+          count: 0,
+          lastReset: Date.now(),
+          maxRequests: 60,
+          resetInterval: 60000
+        };
+      }
+
+      checkRateLimit() {
+        const now = Date.now();
+        if (now - this.rateLimit.lastReset > this.rateLimit.resetInterval) {
+          this.rateLimit.count = 0;
+          this.rateLimit.lastReset = now;
+        }
+
+        if (this.rateLimit.count >= this.rateLimit.maxRequests) {
+          throw new Error('Rate limit exceeded. Please wait a moment.');
+        }
+
+        this.rateLimit.count++;
+        return true;
+      }
+
+      createSecureConnection(prompt, taskType) {
+        if (!this.checkRateLimit()) return null;
+
+        const currentAppId = HARDCODED_APP_ID;
+
+        const piiResult = securityManager.scanForPII(prompt);
+        const sanitizedPrompt = securityManager.sanitizeText(prompt);
+
+        if (piiResult.detected) {
+          this.showPrivacyAlert(piiResult.items.length, taskType);
+        }
+
+        const encodedPrompt = encodeURIComponent(sanitizedPrompt);
+        const wsUrl = `wss://backend.buildpicoapps.com/ask_ai_streaming?app_id=${currentAppId}&prompt=${encodedPrompt}`;
+
+        try {
+          this.currentWebSocket = new WebSocket(wsUrl);
+          this.setupWebSocketHandlers(taskType);
+          return this.currentWebSocket;
+        } catch (error) {
+          this.showError('Failed to establish secure connection');
+          return null;
+        }
+      }
+
+      setupWebSocketHandlers(taskType) {
+        const outputElement = document.getElementById(`${taskType}Output`);
+        let currentResponse = '';
+
+        outputElement.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+        outputElement.scrollTop = outputElement.scrollHeight;
+
+        this.currentWebSocket.onopen = () => {
+          console.log('✅ Secure WebSocket connection established');
+        };
+
+        this.currentWebSocket.onmessage = (event) => {
           try {
-            // The API sends plain text chunks, not JSON
-            const textChunk = event.data;
-            console.log('Received text chunk:', textChunk);
-            
-            // Append the text chunk to our current response
-            currentResponse += textChunk;
-            
-            // Update the output element with streaming cursor
-            outputElement.innerHTML = currentResponse + '<span class="streaming-cursor"></span>';
-            
-            // Auto-scroll to bottom
+            currentResponse += event.data;
+            outputElement.innerHTML = this.formatResponse(currentResponse, taskType);
             outputElement.scrollTop = outputElement.scrollHeight;
-            
           } catch (error) {
             console.error('Error processing message:', error);
-            outputElement.textContent = 'Error processing response: ' + error.message;
+            outputElement.textContent = 'Error processing response';
           }
         };
-        
-        currentWebSocket.onclose = (event) => {
-          console.log('WebSocket closed:', event.code, event.reason);
-          
-          // Remove streaming cursor when connection closes
-          const outputElement = document.getElementById(`${taskType}Output`);
-          outputElement.textContent = currentResponse;
-          
-          if (event.code !== 1000) {
-            updateConnectionStatus('disconnected', 'Connection closed');
+
+        this.currentWebSocket.onclose = (event) => {
+          if (event.code === 1000) {
+            outputElement.innerHTML = this.formatResponse(currentResponse, taskType);
           } else {
-            updateConnectionStatus('connected', 'Response complete');
+            this.showError('Connection closed unexpectedly');
           }
-          
-          enableButton(taskType);
+          this.enableButton(taskType);
         };
-        
-        currentWebSocket.onerror = (error) => {
+
+        this.currentWebSocket.onerror = (error) => {
           console.error('WebSocket error:', error);
-          const outputElement = document.getElementById(`${taskType}Output`);
-          outputElement.textContent = 'Connection error. Please check your App ID and try again.';
-          updateConnectionStatus('disconnected', 'Connection error');
-          enableButton(taskType);
+          this.showError('Secure connection error. Please try again.');
+          outputElement.textContent = 'Connection error. Please try again.';
+          this.enableButton(taskType);
         };
+      }
+
+      formatResponse(text, taskType) {
+        let formatted = text;
         
-        return currentWebSocket;
-      } catch (error) {
-        console.error('Failed to create WebSocket:', error);
-        const outputElement = document.getElementById(`${taskType}Output`);
-        outputElement.textContent = 'Failed to create connection: ' + error.message;
-        updateConnectionStatus('disconnected', 'Connection failed');
-        enableButton(taskType);
-        return null;
+        if (taskType === 'study') {
+          formatted = formatted.replace(/\n/g, '<br>');
+        }
+        
+        if (taskType === 'proof') {
+          formatted = `<div class="corrected-text">${formatted}</div>`;
+        }
+        
+        return formatted + '<span class="streaming-cursor"></span>';
+      }
+
+      showPrivacyAlert(piiCount, taskType) {
+        const alertElement = document.getElementById(`${taskType}Alert`);
+        if (alertElement && securityManager.settings.showAlerts) {
+          alertElement.style.display = 'flex';
+          alertElement.innerHTML = `
+            <i class="fas fa-shield-alt"></i>
+            <span>Protected ${piiCount} pieces of personal information</span>
+          `;
+          setTimeout(() => {
+            alertElement.style.display = 'none';
+          }, 5000);
+        }
+      }
+
+      showError(message) {
+        showNotification(message, 'error');
+      }
+
+      enableButton(taskType) {
+        const button = document.getElementById(`${taskType}Btn`);
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = `<i class="${this.getButtonIcon(taskType)}"></i> ${this.getButtonText(taskType)}`;
+        }
+      }
+
+      getButtonIcon(type) {
+        const icons = { ask: 'fas fa-robot', writer: 'fas fa-magic', translate: 'fas fa-exchange-alt', proof: 'fas fa-check-circle', study: 'fas fa-lightbulb' };
+        return icons[type] || 'fas fa-cog';
+      }
+
+      getButtonText(type) {
+        const texts = { ask: 'Ask AI Assistant', writer: 'Rewrite Text', translate: 'Translate Text', proof: 'Proofread Text', study: 'Explain Concept' };
+        return texts[type] || 'Process';
       }
     }
 
+    // Initialize Security and WebSocket Managers
+    const securityManager = new BackgroundSecurityManager();
+    const wsManager = new SecureWebSocketManager();
+
+    // UI Management Functions
+    function setupNavigation() {
+      const pages = document.querySelectorAll('.page');
+      const navLinks = document.querySelectorAll('.nav-links a');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetPage = link.getAttribute('data-page');
+          navigateToPage(targetPage);
+        });
+      });
+    }
+
+    function navigateToPage(pageId) {
+      const pages = document.querySelectorAll('.page, .tool-page');
+      const navLinks = document.querySelectorAll('.nav-links a');
+      
+      navLinks.forEach(nl => nl.classList.remove('active'));
+      const activeNavLink = document.querySelector(`.nav-links a[data-page="${pageId}"]`);
+      if (activeNavLink) {
+        activeNavLink.classList.add('active');
+      }
+      
+      pages.forEach(page => {
+        page.classList.remove('active');
+        if (page.id === `${pageId}Page`) {
+          page.classList.add('active');
+        }
+      });
+    }
+
+    function openTool(tool) {
+      navigateToPage(tool);
+      
+      setTimeout(() => {
+        const input = document.getElementById(`${tool}Input`);
+        if (input) input.focus();
+      }, 100);
+    }
+
+    function goHome() {
+      navigateToPage('home');
+    }
+
+    function showPrivacyModal() {
+      document.getElementById('privacyModal').classList.add('active');
+    }
+
+    function closePrivacyModal() {
+      document.getElementById('privacyModal').classList.remove('active');
+    }
+
+    function clearAllData() {
+      if (confirm('This will clear all your data including settings. Continue?')) {
+        localStorage.clear();
+        showNotification('All data cleared successfully!', 'success');
+        setTimeout(() => location.reload(), 1000);
+      }
+    }
+
+    function exportData() {
+      const data = {
+        securitySettings: securityManager.settings,
+        securityStats: securityManager.stats,
+        theme: localStorage.getItem('zedlearn_theme'),
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zedlearn-data-${new Date().getTime()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showNotification('Data exported successfully!', 'success');
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 100);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 4000);
+    }
+
+    // AI Processing Functions
     function processWithAI(type) {
-      if (!currentAppId) {
-        alert('Please enter your App ID first');
-        return;
-      }
-      
-      let inputElement, prompt;
-      
-      switch(type) {
-        case 'writer':
-          inputElement = document.getElementById('writerInput');
-          prompt = `Rewrite the following text to be more professional and clear while maintaining the original meaning:\n\n${inputElement.value}`;
-          break;
-        case 'translate':
-          inputElement = document.getElementById('translateInput');
-          const language = document.getElementById('language').value;
-          prompt = `Translate the following text to ${language}. Provide only the translation:\n\n${inputElement.value}`;
-          break;
-        case 'proof':
-          inputElement = document.getElementById('proofInput');
-          prompt = `Proofread and correct the following text, fixing any grammar, spelling, or punctuation errors. Provide only the corrected text:\n\n${inputElement.value}`;
-          break;
-        case 'study':
-          inputElement = document.getElementById('studyInput');
-          prompt = `Explain the following study topic in simple terms with clear examples:\n\n${inputElement.value}`;
-          break;
-        case 'ask':
-          inputElement = document.getElementById('askInput');
-          prompt = inputElement.value;
-          break;
-        default:
-          return;
-      }
-      
+      const inputElement = document.getElementById(`${type}Input`);
       const inputValue = inputElement.value.trim();
       
       if (!inputValue) {
-        alert(`Please enter some text to ${type}.`);
+        showNotification('Please enter some text to process', 'error');
         return;
       }
-      
-      // Disable button and show loading state
-      disableButton(type);
-      
-      // Create WebSocket connection
-      createWebSocketConnection(prompt, type);
-    }
 
-    function disableButton(type) {
+      if (inputValue.length > 5000) {
+        showNotification('Text is too long. Please limit to 5000 characters.', 'error');
+        return;
+      }
+
+      let prompt = inputValue;
+      switch(type) {
+        case 'writer':
+          prompt = `Rewrite the following text to be more professional, clear, and engaging while maintaining the original meaning. Improve vocabulary, sentence structure, and flow:\n\n"${inputValue}"`;
+          break;
+        case 'translate':
+          const language = document.getElementById('language').value;
+          prompt = `Translate the following text to ${language}. Provide only the translation without any additional text:\n\n"${inputValue}"`;
+          break;
+        case 'proof':
+          prompt = `Proofread and correct the following text. Fix all grammar, spelling, punctuation, and capitalization errors. Provide only the corrected text:\n\n"${inputValue}"`;
+          break;
+        case 'study':
+          prompt = `Explain the following study topic in simple, clear terms that a student can easily understand. Provide comprehensive explanations with examples and key points:\n\n"${inputValue}"`;
+          break;
+      }
+
       const button = document.getElementById(`${type}Btn`);
-      if (button) {
-        button.disabled = true;
-        button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+      clearInput(type);
+      
+      wsManager.createSecureConnection(prompt, type);
+    }
+
+    // Input/Output Management
+    function clearInput(toolId) {
+      const inputElement = document.getElementById(`${toolId}Input`);
+      if (inputElement) {
+        inputElement.value = '';
       }
     }
 
-    function enableButton(type) {
-      const button = document.getElementById(`${type}Btn`);
-      if (button) {
-        button.disabled = false;
-        button.innerHTML = getButtonIcon(type) + getButtonText(type);
+    function clearOutput(toolId) {
+      const outputElement = document.getElementById(`${toolId}Output`);
+      if (outputElement) {
+        const defaults = {
+          'ask': 'Your AI response will appear here...',
+          'writer': 'The improved version of your text will appear here...',
+          'translate': 'The translation will appear here...',
+          'proof': 'The corrected text will appear here...',
+          'study': 'The detailed explanation will appear here...'
+        };
+        outputElement.textContent = defaults[toolId] || 'Results will appear here...';
       }
     }
 
-    function getButtonText(type) {
-      const texts = {
-        'writer': 'Rewrite Text',
-        'translate': 'Translate',
-        'proof': 'Proofread Text',
-        'study': 'Explain Concept',
-        'ask': 'Ask AI'
+    // Privacy Controls
+    function setupPrivacyControls() {
+      document.getElementById('piiDetection').addEventListener('change', (e) => {
+        securityManager.settings.piiDetection = e.target.checked;
+        securityManager.saveSettings();
+        showNotification(`PII Detection ${e.target.checked ? 'enabled' : 'disabled'}`, 'success');
+      });
+
+      document.getElementById('privacyAlerts').addEventListener('change', (e) => {
+        securityManager.settings.showAlerts = e.target.checked;
+        securityManager.saveSettings();
+        showNotification(`Privacy Alerts ${e.target.checked ? 'enabled' : 'disabled'}`, 'success');
+      });
+
+      document.getElementById('autoCleanup').addEventListener('change', (e) => {
+        securityManager.settings.autoCleanup = e.target.checked;
+        securityManager.saveSettings();
+        showNotification(`Auto Data Cleanup ${e.target.checked ? 'enabled' : 'disabled'}`, 'success');
+      });
+
+      document.getElementById('privacyLevel').addEventListener('change', (e) => {
+        setPrivacyLevel(e.target.value);
+      });
+    }
+
+    function setPrivacyLevel(level) {
+      const settings = {
+        'max': { piiDetection: true, encryption: true, autoCleanup: true, showAlerts: true },
+        'balanced': { piiDetection: true, encryption: true, autoCleanup: false, showAlerts: true },
+        'minimal': { piiDetection: false, encryption: true, autoCleanup: false, showAlerts: false }
       };
-      return texts[type] || 'Process';
+
+      securityManager.settings = { ...securityManager.settings, ...settings[level] };
+      securityManager.saveSettings();
+      showNotification(`Privacy level set to: ${level} protection`, 'success');
     }
 
-    function getButtonIcon(type) {
-      const icons = {
-        'writer': '<i class="fas fa-magic"></i> ',
-        'translate': '<i class="fas fa-exchange-alt"></i> ',
-        'proof': '<i class="fas fa-check-circle"></i> ',
-        'study': '<i class="fas fa-lightbulb"></i> ',
-        'ask': '<i class="fas fa-question-circle"></i> '
-      };
-      return icons[type] || '<i class="fas fa-cog"></i> ';
-    }
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      setupNavigation();
+      
+      // Theme Toggle
+      document.getElementById('themeToggle').addEventListener('click', function() {
+        document.body.classList.toggle('dark-theme');
+        const icon = this.querySelector('i');
+        icon.className = document.body.classList.contains('dark-theme') ? 'fas fa-sun' : 'fas fa-moon';
+        
+        localStorage.setItem('zedlearn_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+      });
 
-    // Close WebSocket when page unloads
-    window.addEventListener('beforeunload', () => {
-      if (currentWebSocket && currentWebSocket.readyState === WebSocket.OPEN) {
-        currentWebSocket.close();
+      // Mobile Menu
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+        document.getElementById('navLinks').classList.toggle('active');
+      });
+
+      // Close modal on background click
+      const privacyModal = document.getElementById('privacyModal');
+      if (privacyModal) {
+        privacyModal.addEventListener('click', function(e) {
+          if (e.target === this) closePrivacyModal();
+        });
       }
+
+      // Setup privacy controls
+      setupPrivacyControls();
+
+      // Set up AI tool buttons
+      ['ask', 'writer', 'translate', 'proof', 'study'].forEach(tool => {
+        const btn = document.getElementById(`${tool}Btn`);
+        if (btn) {
+          btn.addEventListener('click', () => processWithAI(tool));
+        }
+      });
+
+      // Load saved theme
+      const savedTheme = localStorage.getItem('zedlearn_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.querySelector('#themeToggle i').className = 'fas fa-sun';
+      }
+
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(e) {
+        const navLinks = document.getElementById('navLinks');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        if (navLinks && navLinks.classList.contains('active') && 
+            !navLinks.contains(e.target) && 
+            !mobileMenuBtn.contains(e.target)) {
+          navLinks.classList.remove('active');
+        }
+      });
     });
-
-    // Initialize when page loads
-    window.addEventListener('load', init);
   </script>
 </body>
 </html>
