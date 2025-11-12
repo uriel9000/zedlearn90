@@ -7,11 +7,11 @@
   
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#4f46e5">
-  <meta name="description" content="AI-powered study assistant with real-time text rewriting, translation, proofreading, and study tools">
+  <meta name="description" content="AI-powered study assistant with real-time text rewriting, translation, proofreading and study tools">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icons/icon-192x192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-  
+  <link rel="icon" type="image/png" href="icon-192x192.png">
+  <link rel="apple-touch-icon" href="icon-192x192.png">
+
   <!-- iOS PWA Support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -929,7 +929,7 @@
     <div id="homePage" class="page active">
       <div class="hero-section">
         <h1>AI-Powered Study Assistant</h1>
-        <p>Secure, private, and intelligent tools to enhance your learning experience</p>
+        <p>Secure, private and intelligent tools to enhance your learning experience</p>
         <div class="security-status secure" style="position: relative; top: 0; right: 0; display: inline-flex;">
           <i class="fas fa-shield-alt"></i>
           <span>All communications are encrypted and protected</span>
@@ -961,7 +961,7 @@
             <i class="fas fa-comment"></i>
           </div>
           <h3>AI Assistant</h3>
-          <p>Get instant answers and explanations for any study-related questions with privacy-first AI responses</p>
+          <p>Get instant answers and explanations for any study-related questions with privacy first AI responses</p>
           <button class="btn" onclick="openTool('ask')">
             <i class="fas fa-robot"></i> Start Chat
           </button>
@@ -997,7 +997,7 @@
             <i class="fas fa-spell-check"></i>
           </div>
           <h3>Proofreader</h3>
-          <p>Fix grammar, spelling, and punctuation errors in your text with intelligent corrections</p>
+          <p>Fix grammar, spelling and punctuation errors in your text with intelligent corrections</p>
           <button class="btn" onclick="openTool('proof')">
             <i class="fas fa-check-circle"></i> Proofread
           </button>
@@ -1046,7 +1046,7 @@
         
         <div class="form-group">
           <label for="askInput">Your question or request</label>
-          <textarea id="askInput" rows="4" placeholder="Ask anything about your studies, concepts, or need explanations..."></textarea>
+          <textarea id="askInput" rows="4" placeholder="Ask anything about your studies, concepts or need explanations..."></textarea>
           <div class="privacy-alert" id="askAlert" style="display: none;">
             <i class="fas fa-shield-alt"></i>
             <span>Personal information protected</span>
@@ -1055,18 +1055,15 @@
         
         <button class="btn" id="askBtn">
           <i class="fas fa-robot"></i>
-          Ask AI Assistant
+          Ask ZedlearnAI Assistant
         </button>
         
         <div class="form-group">
-          <label>AI Response</label>
-          <div id="askOutput" class="output-box">Your AI response will appear here...</div>
+          <label>ZedlearnAI Response</label>
+          <div id="askOutput" class="output-box">Your ZedlearnAI response will appear here...</div>
         </div>
 
         <div class="tool-actions">
-          <button class="btn btn-outline" onclick="clearInput('ask')">
-            <i class="fas fa-eraser"></i> Clear Input
-          </button>
           <button class="btn btn-outline" onclick="clearOutput('ask')">
             <i class="fas fa-trash"></i> Clear Output
           </button>
@@ -1108,9 +1105,6 @@
         </div>
 
         <div class="tool-actions">
-          <button class="btn btn-outline" onclick="clearInput('writer')">
-            <i class="fas fa-eraser"></i> Clear Input
-          </button>
           <button class="btn btn-outline" onclick="clearOutput('writer')">
             <i class="fas fa-trash"></i> Clear Output
           </button>
@@ -1168,9 +1162,6 @@
         </div>
 
         <div class="tool-actions">
-          <button class="btn btn-outline" onclick="clearInput('translate')">
-            <i class="fas fa-eraser"></i> Clear Input
-          </button>
           <button class="btn btn-outline" onclick="clearOutput('translate')">
             <i class="fas fa-trash"></i> Clear Output
           </button>
@@ -1212,9 +1203,6 @@
         </div>
 
         <div class="tool-actions">
-          <button class="btn btn-outline" onclick="clearInput('proof')">
-            <i class="fas fa-eraser"></i> Clear Input
-          </button>
           <button class="btn btn-outline" onclick="clearOutput('proof')">
             <i class="fas fa-trash"></i> Clear Output
           </button>
@@ -1229,7 +1217,7 @@
       <div class="card">
         <div class="card-header">
           <i class="fas fa-graduation-cap"></i>
-          <h2>Study Assistant</h2>
+          <h2>Zedlearn Study Assistant</h2>
           <div class="security-badge">
             <i class="fas fa-shield-alt"></i>
             <span>Secure</span>
@@ -1256,9 +1244,6 @@
         </div>
 
         <div class="tool-actions">
-          <button class="btn btn-outline" onclick="clearInput('study')">
-            <i class="fas fa-eraser"></i> Clear Input
-          </button>
           <button class="btn btn-outline" onclick="clearOutput('study')">
             <i class="fas fa-trash"></i> Clear Output
           </button>
