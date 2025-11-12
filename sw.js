@@ -3,8 +3,8 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icon-192x192.png',
+  '/icon-512x512.png'
 ];
 
 // Install event - cache essential files
@@ -104,8 +104,8 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body || 'New notification from ZedLearn',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: '/icon-192x192.png',
+    badge: '/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/'
@@ -144,4 +144,5 @@ self.addEventListener('notificationclick', (event) => {
       })
     );
   }
+
 });
